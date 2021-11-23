@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
             int tmp_pid = atoi(buffer);
             if((0 < tmp_pid) && (curr_pid > tmp_pid))
             {
-                g_print("==> send message to %s!\n", tmp_pid);
+                g_print("==> send message to %d!\n", tmp_pid);
                 kill(tmp_pid, SIGUSR1);
             }
         }
