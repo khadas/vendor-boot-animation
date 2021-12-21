@@ -2,30 +2,42 @@
 ## sample Makefile for boot-animation
 #
 #
-OBJ = boot-animation.o
-CFLAGS = -Wall -Wextra -fpermissive -g
-LDFLAGS = -L ./
-TARGET=boot-animation
+TARGET=boot-animation boot-animation-player
+OBJ1=boot_animation.o signal_proc.o
+OBJ2=boot_animation_player.o media_player.o
+OBJ_COM=signal_proc.o
 
+CFLAGS = -Wall -Wextra -fpermissive
 export PKG_CONFIG_PATH=$(TARGET_DIR)/../host/$(CROSSCOMPILE)/sysroot/usr/lib/pkgconfig
 export PKG_CONFIG=$(TARGET_DIR)/../host/bin/pkg-config
 CFLAGS += $(shell $(PKG_CONFIG) --cflags gstreamer-1.0)
 LDFLAGS += $(shell $(PKG_CONFIG) --libs gstreamer-1.0)
-#LDFLAGS += -L$(TARGET_OUTPUT_DIR)/host/$(CROSSCOMPILE)/sysroot/usr/lib/gstreamer-1.0 -lgstamlvsink -lgstamlvdec
+LDFLAGS += -lpthread
 
 # rules
-all: $(TARGET)
+all: boot-animation boot-animation-player
 
-$(TARGET): $(OBJ)
-	$(CC) $^ $(LDFLAGS) -o $@ 
+boot-animation: $(OBJ1) $(OBJ_COM)
+	$(CC) $^ $(LDFLAGS) -o $@
 
-%.o: %.c
-	$(CC) -c $(CFLAGS) $^ -o $@ 
+boot-animation-player: $(OBJ2) $(OBJ_COM)
+	$(CC) $^ $(LDFLAGS) -o $@
+
+$(OBJ1):%.o:%.c
+	$(CC) -c $(CFLAGS) $^ -o $@
+
+$(OBJ2):%.o:%.c
+	$(CC) -c $(CFLAGS) $^ -o $@
+
+$(OBJ_COM):%.o:%.c
+	$(CC) -c $(CFLAGS) $^ -o $@
 
 .PHONY: clean
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ1)
+	rm -f $(OBJ2)
 
 install:
 	cp boot-animation $(DESTDIR)/bin/boot-animation
+	cp boot-animation-player $(DESTDIR)/bin/boot-animation-player
