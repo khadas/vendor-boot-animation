@@ -26,6 +26,7 @@ typedef enum
 
 /* Forward definition for the message and keyboard processing functions */
 static gboolean handle_message(GstBus *bus, GstMessage *msg, CustomData *hdl);
+static void enable_factory(const gchar *name, gboolean enable);
 
 /***************************************************
  * External Api
@@ -49,6 +50,8 @@ int media_player_create(void **phdl)
 
     /* Initialize GStreamer */
     gst_init(NULL, NULL);
+    enable_factory((const char *)"amladec", FALSE);
+    enable_factory((const char *)"amlasink", FALSE);
 
     /* Build the pipeline and main loop  */
     data->pipeline = gst_parse_launch("playbin", NULL);
@@ -278,4 +281,34 @@ static gboolean handle_message(GstBus *bus, GstMessage *msg, CustomData *data)
 
     /* We want to keep receiving messages */
     return TRUE;
+}
+
+static void enable_factory(const gchar *name, gboolean enable)
+{
+    GstRegistry *registry = NULL;
+    GstElementFactory *factory = NULL;
+
+    registry = gst_registry_get();
+    if (!registry)
+    {
+        return;
+    }
+
+    factory = gst_element_factory_find(name);
+    if (!factory)
+    {
+        return;
+    }
+
+    if (enable)
+    {
+        gst_plugin_feature_set_rank(GST_PLUGIN_FEATURE(factory), GST_RANK_PRIMARY + 1);
+    }
+    else
+    {
+        gst_plugin_feature_set_rank(GST_PLUGIN_FEATURE(factory), GST_RANK_NONE);
+    }
+
+    gst_registry_add_feature(registry, GST_PLUGIN_FEATURE(factory));
+    return;
 }
