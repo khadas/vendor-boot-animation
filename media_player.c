@@ -52,9 +52,11 @@ int media_player_create(void **phdl)
     gst_init(NULL, NULL);
     enable_factory((const char *)"amladec", FALSE);
     enable_factory((const char *)"amlasink", FALSE);
+    enable_factory((const char *)"amlvdec", TRUE);
+    enable_factory((const char *)"amlvsink", TRUE);
 
     /* Build the pipeline and main loop  */
-    data->pipeline = gst_parse_launch("playbin", NULL);
+    data->pipeline = gst_parse_launch("playbin video-sink=amlvsink", NULL);
     data->main_loop = g_main_loop_new(NULL, FALSE);
     data->init = TRUE;
     data->playing = FALSE;
