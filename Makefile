@@ -8,8 +8,6 @@ OBJ2=boot_animation_player.o media_player.o
 OBJ_COM=signal_proc.o
 
 CFLAGS = -Wall -Wextra -fpermissive
-export PKG_CONFIG_PATH=$(TARGET_DIR)/../host/$(CROSSCOMPILE)/sysroot/usr/lib/pkgconfig
-export PKG_CONFIG=$(TARGET_DIR)/../host/bin/pkg-config
 CFLAGS += $(shell $(PKG_CONFIG) --cflags gstreamer-1.0)
 LDFLAGS += $(shell $(PKG_CONFIG) --libs gstreamer-1.0)
 LDFLAGS += -lpthread
