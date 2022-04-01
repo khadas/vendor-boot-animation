@@ -50,13 +50,24 @@ int media_player_create(void **phdl)
 
     /* Initialize GStreamer */
     gst_init(NULL, NULL);
-    enable_factory((const char *)"amladec", FALSE);
-    enable_factory((const char *)"amlasink", FALSE);
-    enable_factory((const char *)"amlvdec", TRUE);
-    enable_factory((const char *)"amlvsink", TRUE);
 
     /* Build the pipeline and main loop  */
-    data->pipeline = gst_parse_launch("playbin video-sink=amlvsink", NULL);
+    if (NULL != gst_element_factory_find("amlvsink")) /* adapt to gst-aml-plugins1 */
+    {
+        enable_factory((const char *)"amladec", FALSE);
+        enable_factory((const char *)"amlasink", FALSE);
+        enable_factory((const char *)"amlvdec", TRUE);
+        enable_factory((const char *)"amlvsink", TRUE);
+        data->pipeline = gst_parse_launch("playbin video-sink=amlvsink", NULL);
+    }
+    else if (NULL != gst_element_factory_find("amltspvsink")) /* adapt to gst1-plugins-tsplayer */
+    {
+        data->pipeline = gst_parse_launch("playbin video-sink=amltspvsink audio-sink=amltspasink", NULL);
+    }
+    else
+    {
+        data->pipeline = gst_parse_launch("playbin", NULL);
+    }
     data->main_loop = g_main_loop_new(NULL, FALSE);
     data->init = TRUE;
     data->playing = FALSE;
