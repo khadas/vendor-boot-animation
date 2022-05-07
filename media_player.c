@@ -2,11 +2,16 @@
 #include <unistd.h>
 #include "media_player.h"
 
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
+
 /* Structure to contain all our information, so we can pass it around */
 typedef struct _CustomData
 {
     gboolean init;        /* media player init flag */
     GstElement *pipeline; /* Our pipeline */
+    GstElement *vsink;    /* videosink element */
     GMainLoop *main_loop; /* GLib's Main Loop */
     MsgCb msgcb;          /* error message callback */
     void *user_data;      /* msgcd's user data */
@@ -27,6 +32,7 @@ typedef enum
 /* Forward definition for the message and keyboard processing functions */
 static gboolean handle_message(GstBus *bus, GstMessage *msg, CustomData *hdl);
 static void enable_factory(const gchar *name, gboolean enable);
+static void first_frame_handler(GstElement *src, guint arg0, gpointer arg1, gpointer user_date);
 
 /***************************************************
  * External Api
@@ -62,12 +68,17 @@ int media_player_create(void **phdl)
     }
     else if (NULL != gst_element_factory_find("amltspvsink")) /* adapt to gst1-plugins-tsplayer */
     {
-        data->pipeline = gst_parse_launch("playbin video-sink=amltspvsink audio-sink=amltspasink", NULL);
+        data->pipeline = gst_parse_launch("playbin audio-sink=amltspasink", NULL);
+        data->vsink = gst_element_factory_make("amltspvsink", "vsink");
+        g_object_set(GST_OBJECT(data->pipeline), "video-sink", data->vsink, NULL);
+        /* Connect to the first-frame signal */
+        g_signal_connect(data->vsink, "first-video-frame-callback", G_CALLBACK(first_frame_handler), NULL);
     }
     else
     {
         data->pipeline = gst_parse_launch("playbin", NULL);
     }
+
     data->main_loop = g_main_loop_new(NULL, FALSE);
     data->init = TRUE;
     data->playing = FALSE;
@@ -323,5 +334,16 @@ static void enable_factory(const gchar *name, gboolean enable)
     }
 
     gst_registry_add_feature(registry, GST_PLUGIN_FEATURE(factory));
+    return;
+}
+
+static void first_frame_handler(GstElement *src, guint arg0, gpointer arg1, gpointer user_date)
+{
+    UNUSED(src);
+    UNUSED(arg0);
+    UNUSED(arg1);
+    UNUSED(user_date);
+
+    g_print("get first frame signal.\n");
     return;
 }
