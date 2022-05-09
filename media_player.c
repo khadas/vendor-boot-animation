@@ -2,6 +2,10 @@
 #include <unistd.h>
 #include "media_player.h"
 
+#ifdef HAVE_SYSTEMD_DAEMON
+#include <signal.h>
+#endif
+
 #ifndef UNUSED
 #define UNUSED(x) (void)(x)
 #endif
@@ -345,5 +349,11 @@ static void first_frame_handler(GstElement *src, guint arg0, gpointer arg1, gpoi
     UNUSED(user_date);
 
     g_print("get first frame signal.\n");
+
+    #ifdef HAVE_SYSTEMD_DAEMON
+    // signal SIGUSR1 to parent process(systemd)
+    kill(getppid(), SIGUSR1);
+    #endif
+
     return;
 }
