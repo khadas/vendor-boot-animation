@@ -41,7 +41,7 @@ static void first_frame_handler(GstElement *src, guint arg0, gpointer arg1, gpoi
 /***************************************************
  * External Api
  ***************************************************/
-int media_player_create(void **phdl)
+int media_player_create(void **phdl, int argc, char **argv)
 {
     /* Check input param */
     if (NULL == phdl)
@@ -59,7 +59,10 @@ int media_player_create(void **phdl)
     memset(data, 0, sizeof(CustomData));
 
     /* Initialize GStreamer */
-    gst_init(NULL, NULL);
+    gst_init(&argc, &argv);
+
+    /* Enable qtdemux */
+    enable_factory((const char*)"qtdemux", TRUE);
 
     /* Build the pipeline and main loop  */
     if (NULL != gst_element_factory_find("amlvsink")) /* adapt to gst-aml-plugins1 */
@@ -72,7 +75,7 @@ int media_player_create(void **phdl)
     }
     else if (NULL != gst_element_factory_find("amltspvsink")) /* adapt to gst1-plugins-tsplayer */
     {
-        data->pipeline = gst_parse_launch("playbin audio-sink=amltspasink", NULL);
+        data->pipeline = gst_parse_launch("playbin", NULL);
         data->vsink = gst_element_factory_make("amltspvsink", "vsink");
         g_object_set(GST_OBJECT(data->pipeline), "video-sink", data->vsink, NULL);
         /* Connect to the first-frame signal */

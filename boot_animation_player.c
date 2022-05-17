@@ -125,7 +125,7 @@ int main(int argc, char **argv)
     }
 
     /* Check input param */
-    if (argc != 4)
+    if (argc < 4)
     {
         goto INV_PARAM;
     }
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     }
 
     /* Start media player */
-    media_player_create(&g_player_ctrl.player);
+    media_player_create(&g_player_ctrl.player, argc, argv);
     media_player_set_uri(g_player_ctrl.player, (char *)uri);
     media_player_set_msgcb(g_player_ctrl.player, msg_cb, (void *)&g_player_ctrl);
     pthread_create(&tid, NULL, media_player_workloop, g_player_ctrl.player);

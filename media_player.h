@@ -18,7 +18,7 @@ typedef enum
 typedef void (*MsgCb)(PlayerMessageCode msg_code, void *user_data);
 
 /* api */
-int media_player_create(void **phdl);
+int media_player_create(void **phdl, int argc, char **argv);
 
 void media_player_destroy(void *hdl);
 

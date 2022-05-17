@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
             goto INV_PARAM;
         }
         /* Start boot-animation-player, default:boot-animation-player /media/boot-animation.mp4 0 0 */
-        ret = execl("/usr/bin/boot-animation-player", "boot-animation-player", "/media/boot-animation.mp4", "0", "0", NULL);
+        ret = execl("/usr/bin/boot-animation-player", "boot-animation-player", "/media/boot-animation.mp4", "0", "0", "--gst-disable-registry-update", NULL);
         if (-1 == ret)
         {
             LOGE("start boot-animation-player failed!\n");
